@@ -10,13 +10,13 @@ from distutils.core import setup
 setup(
   name = 'dfparser',
   packages = ['dfparser'],
-  version = '0.0.4',
+  version = '0.0.5',
   description = 'Parser for dataforge-envelope (http://npm.mipt.ru/dataforge/)'
   ' format.',
   author = 'Vasilii Chernov',
   author_email = 'kapot65@gmail.com',
   url = 'https://github.com/kapot65/python-df-parser',
-  download_url = 'https://github.com/kapot65/python-df-parser/tarball/0.0.4',
+  download_url = 'https://github.com/kapot65/python-df-parser/tarball/0.0.5',
   keywords = ['dataforge', 'parser'],
   install_requires=[
    'numpy'

@@ -19,7 +19,8 @@ del cur_dir
 
 from type_codes import meta_types, header_types
         
-def create_message(json_meta: dict, data: bytearray=b'') -> bytearray:
+def create_message(json_meta: dict, data: bytearray=b'',
+                   data_type: "binary_types"=0) -> bytearray:
     """
      Create message, containing meta and data in df-envelope format
      @json_meta - metadata
@@ -29,7 +30,7 @@ def create_message(json_meta: dict, data: bytearray=b'') -> bytearray:
     """
     __check_data(data)
     
-    header = __create_machine_header(json_meta, data)
+    header = __create_machine_header(json_meta, data, data_type)
     meta = __prepare_meta(json_meta)
     
     return header + meta + data
@@ -165,7 +166,7 @@ def __create_machine_header(json_meta: dict, data: bytearray=b'',
     #meta length
     binary_header += struct.pack('>I', len(json_meta))
     #data type
-    binary_header += struct.pack('>I', 0)
+    binary_header += struct.pack('>I', data_type)
     #data length
     binary_header += struct.pack('>I', len(data))
     
