@@ -23,7 +23,7 @@ if not cur_dir in sys.path: sys.path.append(cur_dir)
 del cur_dir
 
 from type_codes import channel_control, synchro_channel_control
-from type_codes import synchro_control
+from type_codes import synchro_control, synchro_channel_types
 
 def serialise_to_rsh(params: dict) -> str:
     """
@@ -54,8 +54,11 @@ def serialise_to_rsh(params: dict) -> str:
                     out += add_val(val, channel[ch_par])
         elif param == "synchro_channel":
             for sync_ch_par in params[param]:
-                out += add_val("%s_%s"%(param, sync_ch_par), 
-                               params[param][sync_ch_par])
+                if sync_ch_par == "type":
+                    out += add_val(param, params[param][sync_ch_par])
+                else:
+                    out += add_val("%s_%s"%(param, sync_ch_par), 
+                                   params[param][sync_ch_par])
         else:
             out += add_val(param, params[param])
 
@@ -91,8 +94,6 @@ def parse_from_rsb(header: bytearray) -> dict:
     params["blocks_in_file"] = struct.unpack('i', header[296:300])[0]
     
     params["waitTime"] = struct.unpack('I', header[300:304])[0]
-    
-    params["synchro_channel"] = struct.unpack('I', header[304:308])[0]
     
     params["threshold"] = struct.unpack('d', header[312:320])[0]
     
@@ -157,6 +158,10 @@ def parse_from_rsb(header: bytearray) -> dict:
             synchro_channel["params"]\
             .append(list(synchro_channel_control.keys())\
             [list(synchro_channel_control.values()).index(param)])
+       
+    synchro_channel_type = struct.unpack('I', header[304:308])[0]
+    synchro_channel["type"] = list(synchro_channel_types.keys())\
+            [list(synchro_channel_types.values()).index(synchro_channel_type)]
     
     
     synchro_channel["gain"] = struct.unpack('I', header[636:640])[0]
@@ -237,9 +242,3 @@ class RshPackage():
         self.file.seek(7168 + num*(96 + 2*ch_num*ev_size) + 96)
         self.file.write(data.tostring())
         self.file.flush()
-
-
-ds = RshPackage("E:/WinPython-64bit-3.6.0.1Qt5/notebooks/20170120-115753.rsb");
-p = ds.params
-from pprint import pprint
-pprint(p)

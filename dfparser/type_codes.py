@@ -24,6 +24,13 @@ binary_types = {
     "HV_TEXT_BINARY": 0x00000201 
   }
 
+#https://bitbucket.org/Kapot/lan10-12pci_base/src/e99ac0a81f952f597c90aa58b7df6a0798204775/Lan12_Params.h?at=master&fileviewer=file-view-default
+synchro_channel_types = {
+	"SYNCHRO_EXTERNAL" : 0,
+	"SYNCHRO_INTERNAL" : 1,
+	"SYNCHRO_PROGRAMM" : 2
+};
+
 # http://www.rudshel.ru/soft/SDK2/Doc/CPP_USER_RU/html/struct_rsh_channel.html
 channel_control = {    
     "NotUsed" : 0x0, 
