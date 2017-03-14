@@ -23,3 +23,38 @@ binary_types = {
     "HV_BINARY": 0x00000200,
     "HV_TEXT_BINARY": 0x00000201 
   }
+
+# http://www.rudshel.ru/soft/SDK2/Doc/CPP_USER_RU/html/struct_rsh_channel.html
+channel_control = {    
+    "NotUsed" : 0x0, 
+    "NoSynchro" : 0x0, 
+    "Resist1MOhm" : 0x0, 
+    "DC": 0x0,
+    "ICPPowerOff" : 0x0, 
+    "Used" : 0x1, 
+    "Synchro" : 0x2, 
+    "AC" : 0x4,
+    "Resist50Ohm" : 0x8,
+    "ICPPowerOn" : 0x10,
+    "FirstChannel" : 0x10000
+}
+
+# http://www.rudshel.ru/soft/SDK2/Doc/CPP_USER_RU/html/struct_rsh_synchro_channel.html
+synchro_channel_control = {
+    "FilterOff" : 0x0, 
+    "Resist1MOhm" : 0x0, 
+    "DC" : 0x0, 
+    "FilterLow" : 0x1,
+    "FilterHigh" : 0x2, 
+    "AC" : 0x4, 
+    "Resist50Ohm" : 0x8   
+}
+
+# http://www.rudshel.ru/soft/SDK2/Doc/CPP_USER_RU/html/struct_rsh_init_a_d_c.html
+synchro_control = {
+    "FrequencySwitchOff" : 0x0, 
+    "SlopeFront" : 0x0, 
+    "SlopeDecline" : 0x2, 
+    "FrequencySwitchToMinimum" : 0x4,
+    "FrequencySwitchToMaximum" : 0x8 
+}

@@ -11,23 +11,183 @@ data file description:
 @author: chernov
 """
 
+import os
+import sys
 import struct
 from datetime import datetime
 
 import numpy as np
 
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+if not cur_dir in sys.path: sys.path.append(cur_dir)
+del cur_dir
+
+from type_codes import channel_control, synchro_channel_control
+from type_codes import synchro_control
+
+def serialise_to_rsh(params: dict) -> str:
+    """
+      Преобразование конфигурационного файла в формате JSON в текстовый хедер 
+      .rsh. Хедер можно использовать как конфигурационный файл для lan10-12base
+      
+      @params -- параметры в формате JSON
+      @return -- текстовый хедер
+      
+    """
+    
+    out = "// Generated at %s\n\n"%(datetime.now())
+    
+    def add_val(field, value):
+        if type(value) is bytes: value = value.decode()
+        val = ''.join('%s, '%(v) for v in value) if type(value) is list else value
+        if type(val) is str and val.endswith(', '): val = val[:-2]
+        return '%s -- %s\n'%(val, field)  
+    
+    for param in params:
+        if param == "channel":
+            for i, channel in enumerate(params[param]):
+                for ch_par in channel:
+                    val = "%s_%s[%s]"%(param, ch_par, i) 
+                    if ch_par == "params":
+                        val = "%ss_%s[%s]"%(param, ch_par, i) 
+                        
+                    out += add_val(val, channel[ch_par])
+        elif param == "synchro_channel":
+            for sync_ch_par in params[param]:
+                out += add_val("%s_%s"%(param, sync_ch_par), 
+                               params[param][sync_ch_par])
+        else:
+            out += add_val(param, params[param])
+
+    return out 
+
+
+def parse_from_rsb(header: bytearray) -> dict:
+    """
+      Парсинг бинарного хедера rsb в JSON
+      
+      @header -- бинарный хедер (2048 bytes)
+      @return -- параметры в формате JSON
+      
+    """
+    
+    params = {}
+    
+    params["text_header_size"] = struct.unpack('I', header[0:4])[0] #check
+
+    params["events_num"] = struct.unpack('I', header[8:12])[0]
+    
+    start_time = struct.unpack('Q', header[16:24])[0]
+    params["start_time"] = datetime.fromtimestamp(start_time).isoformat()
+    end_time = struct.unpack('Q', header[24:32])[0]
+    params["end_time"] = datetime.fromtimestamp(end_time).isoformat()
+    
+    params["filepath"] = header[32: 32 + 255].rstrip(b'\0')
+    
+    params["num_blocks"] = struct.unpack('I', header[288:292])[0] #check
+    
+    params["aquisition_time"] = struct.unpack('I', header[292:296])[0]
+    
+    params["blocks_in_file"] = struct.unpack('i', header[296:300])[0]
+    
+    params["waitTime"] = struct.unpack('I', header[300:304])[0]
+    
+    params["synchro_channel"] = struct.unpack('I', header[304:308])[0]
+    
+    params["threshold"] = struct.unpack('d', header[312:320])[0]
+    
+
+    sync_params_num = struct.unpack('I', header[336:340])[0]
+    sync_params = np.unique(np.frombuffer(header[320:336], np.uint32)
+                            [:sync_params_num])
+    params["synchro_control"] = []
+    for param in sync_params:
+        if param == 0:
+            params["synchro_control"].append("Default")
+        else:
+            params["synchro_control"].append(list(synchro_control.keys())\
+            [list(synchro_control.values()).index(param)])
+    
+    
+    params["sample_freq"] = struct.unpack('d', header[344:352])[0]
+    params["pre_history"] = struct.unpack('I', header[352:356])[0]
+    
+    params["packet_number"] = struct.unpack('I', header[356:360])[0]
+    
+    params["b_size"] = struct.unpack('I', header[360:364])[0]
+    
+    params["hysteresis"] = struct.unpack('I', header[364:368])[0]
+    
+    params["channel_number"] = struct.unpack('I', header[368:372])[0]
+    
+    ch_params = []
+    
+    for i in range(params["channel_number"]):
+        ch_data = header[372 + 56*i: 372 + 56*(i+1)]
+        ch_param = {}
+        
+        param_num = struct.unpack('I', ch_data[36:40])[0]
+        ch_params_raw = np.unique(np.frombuffer(ch_data[4:36], 
+                                                np.uint32)[:param_num])
+        ch_param["params"] = []
+        for param in ch_params_raw:
+            if param == 0:
+                ch_param["params"].append("Default")
+            else:
+                ch_param["params"].append(list(channel_control.keys())\
+                [list(channel_control.values()).index(param)])
+        
+        ch_param["adjustment"] = struct.unpack('d', ch_data[44:52])[0]
+        ch_param["gain"] = struct.unpack('I', ch_data[52:56])[0]
+        ch_params.append(ch_param)
+        
+    params["channel"] = ch_params
+        
+        
+    synchro_channel = {}
+    sync_ch_par_num = struct.unpack('I', header[632:636])[0]
+    sync_ch_params_raw = np.unique(np.frombuffer(header[600:632], 
+                                                 np.uint32)[:sync_ch_par_num])
+    
+    synchro_channel["params"] = []
+    for param in sync_ch_params_raw:
+        if param == 0:
+            synchro_channel["params"].append("Default")
+        else:
+            synchro_channel["params"]\
+            .append(list(synchro_channel_control.keys())\
+            [list(synchro_channel_control.values()).index(param)])
+    
+    
+    synchro_channel["gain"] = struct.unpack('I', header[636:640])[0]
+    
+    params["synchro_channel"] = synchro_channel
+    
+    params["err_lang"] = struct.unpack('I', header[640:644])[0]
+    params["board_name"] = header[644: 644 + 255].rstrip(b'\0')
+    
+    params["board_id"] = struct.unpack('I', header[900: 904])[0]
+    
+    return params
+
 
 class RshPackage():
     
-    def __init__(self, filename):
-        self.file = open(filename, "rb+")
+    def __init__(self, file, fp=None):
+        """
+          @file -- filename or opened file
+        """
+        if type(file) == str:
+            self.file = open(file, "rb+")
+        else:
+            self.file = file
+        
         self.file.seek(0)
         
         self.text_header = self.file.read(5120).decode("cp1251").rstrip('\0')
 
         header = self.file.read(2048)
-        
-        self.params = self.__parse_header(header)
+        self.params = parse_from_rsb(header)
         
     def get_event(self, num):
         if num < 0 or num >= self.params["events_num"]:
@@ -78,79 +238,8 @@ class RshPackage():
         self.file.write(data.tostring())
         self.file.flush()
 
-    def __parse_header(self, header):
-        """
-          @header - binary header (2048 bytes)
-          
-        """
-        params = {}
-        
-        params["text_header_size"] = struct.unpack('I', header[0:4])[0] #check
 
-        params["events_num"] = struct.unpack('I', header[8:12])[0]
-        
-        start_time = struct.unpack('Q', header[16:24])[0]
-        params["start_time"] = datetime.fromtimestamp(start_time)
-        end_time = struct.unpack('Q', header[24:32])[0]
-        params["end_time"] = datetime.fromtimestamp(end_time)
-        
-        params["datapath"] = header[32: 32 + 255].rstrip(b'\0')
-        
-        #acquisition max frames
-        params["max_events"] = struct.unpack('I', header[288:292])[0]
-        
-        #acquisition max time in msec
-        params["max_time"] = struct.unpack('I', header[292:296])[0]
-        
-        params["events_per_file"] = struct.unpack('I', header[296:300])[0]
-        
-        
-        params["max_wait_time"] = struct.unpack('I', header[300:304])[0]
-        
-        params["syncho_channel"] = struct.unpack('I', header[304:308])[0]
-        
-        params["threshold"] = struct.unpack('d', header[312:320])[0]
-        
-        params["sync_params"] = header[320:336] #convert
-        params["sync_params_num"] = struct.unpack('I', header[336:340])[0]
-        
-        params["freq"] = struct.unpack('d', header[344:352])[0]
-        params["pre_history_size"] = struct.unpack('I', header[352:356])[0]
-        
-        params["events_in_pack"] = struct.unpack('I', header[356:360])[0]
-        
-        params["event_size"] = struct.unpack('I', header[360:364])[0]
-        
-        params["hyst_level"] = struct.unpack('I', header[364:368])[0]
-        
-        params["ch_num"] = struct.unpack('I', header[368:372])[0]
-        
-        ch_params = []
-        
-        for i in range(4):
-            ch_data = header[372 + 56*i: 372 + 56*(i+1)]
-            ch_param = {}
-            ch_param["params"] = ch_data[4:36] #convert
-            ch_param["param_num"] = struct.unpack('I', ch_data[36:40])[0]
-            ch_param["adjustment"] = struct.unpack('d', ch_data[44:52])[0]
-            ch_param["gain"] = struct.unpack('I', ch_data[52:56])[0]
-            ch_params.append(ch_param)
-            
-        params["ch_params"] = ch_params
-            
-            
-        sync_params = {}
-        
-        sync_params["params"] = header[600:632] #convert
-        sync_params["param_num"] = struct.unpack('I', header[632:636])[0]
-        sync_params["gain"] = struct.unpack('I', header[636:640])[0]
-        
-        params["sync_params"] = sync_params
-        
-        params["err_lang"] = struct.unpack('I', header[640:644])[0]
-        params["board_name"] = header[644: 644 + 255].rstrip(b'\0')
-        
-        params["board_id"] = struct.unpack('I', header[900: 904])[0]
-        
-        return params
-
+ds = RshPackage("E:/WinPython-64bit-3.6.0.1Qt5/notebooks/20170120-115753.rsb");
+p = ds.params
+from pprint import pprint
+pprint(p)
