@@ -10,7 +10,7 @@ from distutils.core import setup
 setup(
   name = 'dfparser',
   packages = ['dfparser'],
-  version = '0.0.8',
+  version = '0.0.9',
   description = 'Parser for dataforge-envelope (http://npm.mipt.ru/dataforge/)'
   ' format.',
   author = 'Vasilii Chernov',

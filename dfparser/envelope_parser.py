@@ -25,6 +25,7 @@ def create_message(json_meta: dict, data: bytearray=b'',
      Create message, containing meta and data in df-envelope format
      @json_meta - metadata
      @data - binary data
+     @data_type - data type code for binary data
      @return - message as bytearray
      
     """
@@ -136,7 +137,7 @@ def __parse_meta(meta_raw, header):
     
 def __prepare_meta(json_meta):
     if type(json_meta) is dict:
-        json_meta = json.dumps(json_meta).encode()
+        json_meta = json.dumps(json_meta, indent=4).encode()
         json_meta += b'\r\n\r\n'
     elif not type(json_meta) is str:
         raise ValueError("Input meta should be dict or str")

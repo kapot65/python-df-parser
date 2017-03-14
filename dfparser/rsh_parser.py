@@ -85,7 +85,7 @@ def parse_from_rsb(header: bytearray) -> dict:
     end_time = struct.unpack('Q', header[24:32])[0]
     params["end_time"] = datetime.fromtimestamp(end_time).isoformat()
     
-    params["filepath"] = header[32: 32 + 255].rstrip(b'\0')
+    params["filepath"] = header[32: 32 + 255].rstrip(b'\0').decode()
     
     params["num_blocks"] = struct.unpack('I', header[288:292])[0] #check
     
@@ -169,7 +169,7 @@ def parse_from_rsb(header: bytearray) -> dict:
     params["synchro_channel"] = synchro_channel
     
     params["err_lang"] = struct.unpack('I', header[640:644])[0]
-    params["board_name"] = header[644: 644 + 255].rstrip(b'\0')
+    params["board_name"] = header[644: 644 + 255].rstrip(b'\0').decode()
     
     params["board_id"] = struct.unpack('I', header[900: 904])[0]
     
@@ -199,8 +199,8 @@ class RshPackage():
             raise IndexError("Index out of range [0:%s]"%
                              (self.params["events_num"]))
             
-        ch_num = self.params['ch_num']
-        ev_size = self.params['event_size']
+        ch_num = self.params['channel_number']
+        ev_size = self.params['b_size']
         
         event = {}
             
@@ -232,8 +232,8 @@ class RshPackage():
         if data.dtype != np.short:
             raise TypeError("data array dtype should be dtype('int16')")
             
-        ch_num = self.params['ch_num']
-        ev_size = self.params['event_size']
+        ch_num = self.params['channel_number']
+        ev_size = self.params['b_size']
             
         if data.shape != (ch_num*ev_size,):
             raise Exception("data should contain same number of elements "\
