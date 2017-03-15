@@ -78,7 +78,7 @@ def parse_from_rsb(header: bytearray) -> dict:
     
     params["text_header_size"] = struct.unpack('I', header[0:4])[0] #check
 
-    params["events_num"] = struct.unpack('I', header[8:12])[0]
+    params["events_num"] = struct.unpack('i', header[8:12])[0]
     
     start_time = struct.unpack('Q', header[16:24])[0]
     params["start_time"] = datetime.fromtimestamp(start_time).isoformat()
@@ -87,13 +87,13 @@ def parse_from_rsb(header: bytearray) -> dict:
     
     params["filepath"] = header[32: 32 + 255].rstrip(b'\0').decode()
     
-    params["num_blocks"] = struct.unpack('I', header[288:292])[0] #check
+    params["num_blocks"] = struct.unpack('i', header[288:292])[0] #check
     
-    params["aquisition_time"] = struct.unpack('I', header[292:296])[0]
+    params["aquisition_time"] = struct.unpack('i', header[292:296])[0]
     
     params["blocks_in_file"] = struct.unpack('i', header[296:300])[0]
     
-    params["waitTime"] = struct.unpack('I', header[300:304])[0]
+    params["waitTime"] = struct.unpack('i', header[300:304])[0]
     
     params["threshold"] = struct.unpack('d', header[312:320])[0]
     
@@ -113,7 +113,7 @@ def parse_from_rsb(header: bytearray) -> dict:
     params["sample_freq"] = struct.unpack('d', header[344:352])[0]
     params["pre_history"] = struct.unpack('I', header[352:356])[0]
     
-    params["packet_number"] = struct.unpack('I', header[356:360])[0]
+    params["packet_number"] = struct.unpack('i', header[356:360])[0]
     
     params["b_size"] = struct.unpack('I', header[360:364])[0]
     
