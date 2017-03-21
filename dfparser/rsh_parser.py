@@ -212,8 +212,10 @@ class RshPackage():
         
         start_time = struct.unpack('Q', self.file.read(8))[0]
         event["start_time"] = datetime.fromtimestamp(start_time)
-        
-        self.file.read(16)
+        ns_since_epoch = struct.unpack('Q', self.file.read(8))[0]
+        if ns_since_epoch:
+            event['ns_since_epoch'] = ns_since_epoch
+        self.file.read(8)
         
         event_data = self.file.read(2*ev_size*ch_num)
         
