@@ -31,7 +31,7 @@ def serialise_to_rsh(params: dict) -> str:
       Преобразование конфигурационного файла в формате JSON в текстовый хедер 
       .rsh. Хедер можно использовать как конфигурационный файл для lan10-12base
       
-      @params -- параметры в формате JSON
+      @params -- параметры в формате JSON (dfparser.def_values.def_rsh_params)
       @return -- текстовый хедер
       
     """
@@ -71,7 +71,7 @@ def parse_from_rsb(header: bytearray) -> dict:
       Парсинг бинарного хедера rsb в JSON
       
       @header -- бинарный хедер (2048 bytes)
-      @return -- параметры в формате JSON
+      @return -- параметры в формате JSON (dfparser.def_values.def_rsh_params)
       
     """
     
@@ -181,7 +181,7 @@ def serialize_to_rsb(params: dict) -> bytes:
     """
       Сериализация JSON хедера rsb
       
-      @params -- параметры в формате JSON
+      @params -- параметры в формате JSON (dfparser.def_values.def_rsh_params)
       @return -- бинарный хедер (2048 bytes)
       
     """

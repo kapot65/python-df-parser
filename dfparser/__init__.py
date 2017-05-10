@@ -18,3 +18,4 @@ from envelope_parser import read_machine_header, get_messages_from_stream
 from rsh_parser import RshPackage, serialise_to_rsh, parse_from_rsb
 from rsh_parser import serialize_to_rsb, dump_to_rsb
 from rsb_event_pb2 import Point
+from df_data import def_values, type_codes
