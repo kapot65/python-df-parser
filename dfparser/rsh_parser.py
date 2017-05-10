@@ -335,7 +335,7 @@ def dump_to_rsb(params: dict, times: np.ndarray, data: np.ndarray) -> bytes:
         text_hdr = datetime.fromtimestamp(int(times[i]*10e-9)).isoformat()
         
         event[:len(text_hdr)] = text_hdr.encode('cp1251')
-        event[64:68] = struct.pack('I', 120)
+        event[64:68] = struct.pack('I', i)
         event[72:80] = struct.pack('Q', int(times[i]*10e-9))
         event[80:88] = struct.pack('Q', int(times[i]))
         
