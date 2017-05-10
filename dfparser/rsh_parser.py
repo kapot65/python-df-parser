@@ -342,7 +342,7 @@ def dump_to_rsb(params: dict, times: np.ndarray, data: np.ndarray) -> bytes:
         event[96:] = ev.astype(np.int16).tostring()
         bin_data += event   
     
-    return text_header + binary_header + bin_data
+    return bytes(text_header + binary_header + bin_data)
 
 
 class RshPackage():
