@@ -39,7 +39,7 @@ def serialise_to_rsh(params: dict) -> str:
     out = "// Generated at %s\n\n"%(datetime.now())
     
     def add_val(field, value):
-        if type(value) is bytes: value = value.decode()
+        if type(value) is bytes: value = value.decode("cp1251")
         val = ''.join('%s, '%(v) for v in value) if type(value) is list else value
         if type(val) is str and val.endswith(', '): val = val[:-2]
         return '%s -- %s\n'%(val, field)  
@@ -86,7 +86,7 @@ def parse_from_rsb(header: bytearray) -> dict:
     end_time = struct.unpack('Q', header[24:32])[0]
     params["end_time"] = datetime.fromtimestamp(end_time).isoformat()
     
-    params["filepath"] = header[32: 32 + 255].rstrip(b'\0').decode()
+    params["filepath"] = header[32: 32 + 255].rstrip(b'\0').decode("cp1251")
     
     params["num_blocks"] = struct.unpack('i', header[288:292])[0] #check
     
@@ -170,14 +170,14 @@ def parse_from_rsb(header: bytearray) -> dict:
     params["synchro_channel"] = synchro_channel
     
     params["err_lang"] = struct.unpack('I', header[640:644])[0]
-    params["board_name"] = header[644: 644 + 255].rstrip(b'\0').decode()
+    params["board_name"] = header[644: 644 + 255].rstrip(b'\0').decode("cp1251")
     
     params["board_id"] = struct.unpack('I', header[900: 904])[0]
     
     return params
 
 
-def serialize_to_rsb(params: dict) -> bytearray:
+def serialize_to_rsb(params: dict) -> bytes:
     """
       Сериализация JSON хедера rsb
       
@@ -188,25 +188,29 @@ def serialize_to_rsb(params: dict) -> bytearray:
     
     header = bytearray(np.zeros(2048, np.byte).tostring())
     
-    header[0:4] = struct.pack('I', params["text_header_size"])
+    if "text_header_size" in params:
+        header[0:4] = struct.pack('I', params["text_header_size"])
     
-    header[8:12] = struct.pack('i', params["events_num"])
+    if "events_num" in params:
+        header[8:12] = struct.pack('i', params["events_num"])
 
-    start_time = dateutil.parser.parse(params["start_time"]).timestamp()
-    header[16:24] = struct.pack('Q', int(start_time))
+    if "start_time" in params:
+        start_time = dateutil.parser.parse(params["start_time"]).timestamp()
+        header[16:24] = struct.pack('Q', int(start_time))
     
-    end_time = dateutil.parser.parse(params["end_time"]).timestamp()
-    header[24:32] = struct.pack('Q', int(end_time))
+    if "end_time" in params:
+        end_time = dateutil.parser.parse(params["end_time"]).timestamp()
+        header[24:32] = struct.pack('Q', int(end_time))
     
     header[32:32+len(params["filepath"])] = params['filepath'].encode('cp1251')
     
     header[288:292] = struct.pack('i', params["num_blocks"])
     
-    header[292:296] = struct.pack('i', params["aquisition_time"])
+    header[292:296] = struct.pack('i', int(params["aquisition_time"]))
     
     header[296:300] = struct.pack('i', params["blocks_in_file"])
     
-    header[300:304] = struct.pack('i', params["waitTime"])
+    header[300:304] = struct.pack('i',  int(params["waitTime"]))
     
     header[312:320] = struct.pack('d', params["threshold"])
     
@@ -272,19 +276,78 @@ def serialize_to_rsb(params: dict) -> bytearray:
     header[636:640] = struct.pack('I', synchro_channel["gain"])
     
 
+    if "err_lang" in params:
+        header[640:644] = struct.pack('I', params["err_lang"])
+        
+    if "board_name" in params:     
+        header[644:644+len(params["board_name"])] = \
+        params['board_name'].encode('cp1251')
     
-    header[640:644] = struct.pack('I', params["err_lang"])
-    header[644:644+len(params["board_name"])] = \
-    params['board_name'].encode('cp1251')
-    
-    header[900: 904] = struct.pack('I', params["board_id"])
+    if "board_id" in params: 
+        header[900: 904] = struct.pack('I', params["board_id"])
     
     return bytes(header)
 
 
+def dump_to_rsb(params: dict, times: np.ndarray, data: np.ndarray) -> bytes:
+    """
+      Сохранение данных в формате rsb
+      
+      @params -- параметры набора
+      @times -- абсолютные времена блоков в наносекундах
+      @data -- данные блоков (block_num, block_size)
+      
+      @return -- сериализованные данные
+      
+    """
+    assert type(times) == np.ndarray
+    assert times.ndim == 1
+    assert type(data) == np.ndarray
+    assert data.ndim == 2
+    assert len(data) == len(times)
+    
+    params['b_size'] = data.shape[1]
+    params['events_num'] = data.shape[0]
+    
+    start = int(times.min()*1e-9)
+    end = int(times.max()*1e-9)
+    
+    if 'start_time' not in params:
+        params['start_time'] = datetime.fromtimestamp(start).isoformat()
+        
+    if 'end_time' not in params:
+        params['end_time'] = datetime.fromtimestamp(end).isoformat()
+    
+    text_header = bytearray(5120)
+    text = serialise_to_rsh(params).encode('cp1251')
+    text_header[:len(text)] = text
+    
+    params['text_header_size'] = len(text)
+    
+    binary_header = serialize_to_rsb(params)
+    
+    bin_data = b''
+    
+    ch_num = params['channel_number']
+    ev_size = params['b_size']
+    for i, ev in enumerate(data):  
+        event = bytearray(np.zeros(96 + 2*ch_num*ev_size, np.byte).tostring())
+        text_hdr = datetime.fromtimestamp(int(times[i]*10e-9)).isoformat()
+        
+        event[:len(text_hdr)] = text_hdr.encode('cp1251')
+        event[64:68] = struct.pack('I', 120)
+        event[72:80] = struct.pack('Q', int(times[i]*10e-9))
+        event[80:88] = struct.pack('Q', int(times[i]))
+        
+        event[96:] = ev.astype(np.int16).tostring()
+        bin_data += event   
+    
+    return text_header + binary_header + bin_data
+
+
 class RshPackage():
     
-    def __init__(self, file, fp=None):
+    def __init__(self, file):
         """
           @file -- filename or opened file
         """
