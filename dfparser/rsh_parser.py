@@ -23,8 +23,8 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 if not cur_dir in sys.path: sys.path.append(cur_dir)
 del cur_dir
 
-from data.type_codes import channel_control, synchro_channel_control
-from data.type_codes import synchro_control, synchro_channel_types
+from df_data.type_codes import channel_control, synchro_channel_control
+from df_data.type_codes import synchro_control, synchro_channel_types
 
 def serialise_to_rsh(params: dict) -> str:
     """

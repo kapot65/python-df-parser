@@ -16,7 +16,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 setup(
   name = 'dfparser',
   packages = find_packages(),
-  version = '0.0.12',
+  version = '0.0.13',
   description = 'Parser for dataforge-envelope (http://npm.mipt.ru/dataforge/)'
   ' format.',
   author = 'Vasilii Chernov',

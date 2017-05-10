@@ -17,7 +17,7 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 if not cur_dir in sys.path: sys.path.append(cur_dir)
 del cur_dir
 
-from data.type_codes import meta_types, header_types
+from df_data.type_codes import meta_types, header_types
         
 def create_message(json_meta: dict, data: bytearray=b'',
                    data_type: "binary_types"=0) -> bytearray:
