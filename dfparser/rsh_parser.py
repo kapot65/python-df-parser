@@ -14,6 +14,7 @@ data file description:
 import os
 import sys
 import struct
+import dateutil
 from datetime import datetime
 
 import numpy as np
@@ -22,8 +23,8 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 if not cur_dir in sys.path: sys.path.append(cur_dir)
 del cur_dir
 
-from type_codes import channel_control, synchro_channel_control
-from type_codes import synchro_control, synchro_channel_types
+from data.type_codes import channel_control, synchro_channel_control
+from data.type_codes import synchro_control, synchro_channel_types
 
 def serialise_to_rsh(params: dict) -> str:
     """
@@ -174,6 +175,111 @@ def parse_from_rsb(header: bytearray) -> dict:
     params["board_id"] = struct.unpack('I', header[900: 904])[0]
     
     return params
+
+
+def serialize_to_rsb(params: dict) -> bytearray:
+    """
+      Сериализация JSON хедера rsb
+      
+      @params -- параметры в формате JSON
+      @return -- бинарный хедер (2048 bytes)
+      
+    """
+    
+    header = bytearray(np.zeros(2048, np.byte).tostring())
+    
+    header[0:4] = struct.pack('I', params["text_header_size"])
+    
+    header[8:12] = struct.pack('i', params["events_num"])
+
+    start_time = dateutil.parser.parse(params["start_time"]).timestamp()
+    header[16:24] = struct.pack('Q', int(start_time))
+    
+    end_time = dateutil.parser.parse(params["end_time"]).timestamp()
+    header[24:32] = struct.pack('Q', int(end_time))
+    
+    header[32:32+len(params["filepath"])] = params['filepath'].encode('cp1251')
+    
+    header[288:292] = struct.pack('i', params["num_blocks"])
+    
+    header[292:296] = struct.pack('i', params["aquisition_time"])
+    
+    header[296:300] = struct.pack('i', params["blocks_in_file"])
+    
+    header[300:304] = struct.pack('i', params["waitTime"])
+    
+    header[312:320] = struct.pack('d', params["threshold"])
+    
+    sync_params = params["synchro_control"]
+    sync_params_num = len(sync_params)
+    
+    header[336:340] = struct.pack('I', sync_params_num)
+    
+    for i in range(sync_params_num):
+        if sync_params[i] == 'Default':
+            code = 0
+        else:
+            code = synchro_control[sync_params[i]]
+        
+        header[320 + i*4:320 + (i + 1)*4] = struct.pack('I', code)
+    
+    
+    header[344:352] = struct.pack('d', params["sample_freq"])
+    header[352:356] = struct.pack('I', params["pre_history"])
+    
+    header[356:360] = struct.pack('i', params["packet_number"])
+    
+    header[360:364] = struct.pack('I', params["b_size"])
+    
+    header[364:368] = struct.pack('I', params["hysteresis"])
+    
+    header[368:372] = struct.pack('I', params["channel_number"])
+    
+
+    
+    for i in range(params["channel_number"]):
+        off = 372 + 56*i
+        
+        ch_param = params['channel'][i]
+        
+        header[off + 44: off + 52] = struct.pack('d', ch_param["adjustment"])
+        header[off + 52: off + 56] = struct.pack('I', ch_param["gain"])
+        header[off + 36: off + 40] = struct.pack('I', len(ch_param['params']))
+
+        
+        for i, param in enumerate(ch_param['params']):
+            if param == 'Default':
+                code = 0
+            else:
+                code = channel_control[param]
+                header[off + 4 + i*4:\
+                       off + 4 + (i + 1)*4] = struct.pack('I', code)
+
+    
+    synchro_channel = params['synchro_channel']
+    header[632:636] = struct.pack('I', len(synchro_channel['params']))
+    
+    for i, param in enumerate(synchro_channel['params']):
+        if param == 'Default':
+            code = 0
+        else:
+            code = synchro_channel_control[param]
+            header[600 + i*4: 600 + (i + 1)*4] = struct.pack('I', code)
+          
+    header[304:308] = struct.pack('I', 
+          synchro_channel_types[synchro_channel['type']])
+    
+    header[636:640] = struct.pack('I', synchro_channel["gain"])
+    
+
+    
+    header[640:644] = struct.pack('I', params["err_lang"])
+    header[644:644+len(params["board_name"])] = \
+    params['board_name'].encode('cp1251')
+    
+    header[900: 904] = struct.pack('I', params["board_id"])
+    
+    return bytes(header)
 
 
 class RshPackage():
