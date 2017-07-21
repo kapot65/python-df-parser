@@ -19,29 +19,28 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='rsb_event.proto',
   package='Rsh',
   syntax='proto3',
-  serialized_pb=_b('\n\x0frsb_event.proto\x12\x03Rsh\"\xb8\x02\n\x05Point\x12$\n\x08\x63hannels\x18\x01 \x03(\x0b\x32\x12.Rsh.Point.Channel\x1a\x88\x02\n\x07\x43hannel\x12\x0b\n\x03num\x18\x01 \x01(\x04\x12(\n\x06\x62locks\x18\x02 \x03(\x0b\x32\x18.Rsh.Point.Channel.Block\x1a\xc5\x01\n\x05\x42lock\x12\x0c\n\x04time\x18\x01 \x01(\x04\x12.\n\x06\x65vents\x18\x02 \x03(\x0b\x32\x1e.Rsh.Point.Channel.Block.Event\x12-\n\x05peaks\x18\x03 \x01(\x0b\x32\x1e.Rsh.Point.Channel.Block.Peaks\x1a#\n\x05\x45vent\x12\x0c\n\x04time\x18\x01 \x01(\x04\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\x1a*\n\x05Peaks\x12\r\n\x05times\x18\x01 \x03(\x04\x12\x12\n\namplitudes\x18\x02 \x03(\x04\x62\x06proto3')
+  serialized_pb=_b('\n\x0frsb_event.proto\x12\x03Rsh\"\xdc\x02\n\x05Point\x12$\n\x08\x63hannels\x18\x01 \x03(\x0b\x32\x12.Rsh.Point.Channel\x1a\xac\x02\n\x07\x43hannel\x12\n\n\x02id\x18\x01 \x01(\x04\x12(\n\x06\x62locks\x18\x02 \x03(\x0b\x32\x18.Rsh.Point.Channel.Block\x1a\xea\x01\n\x05\x42lock\x12\x0c\n\x04time\x18\x01 \x01(\x04\x12.\n\x06\x66rames\x18\x02 \x03(\x0b\x32\x1e.Rsh.Point.Channel.Block.Frame\x12/\n\x06\x65vents\x18\x03 \x01(\x0b\x32\x1f.Rsh.Point.Channel.Block.Events\x12\x0e\n\x06length\x18\x04 \x01(\x04\x12\x10\n\x08\x62in_size\x18\x05 \x01(\x04\x1a#\n\x05\x46rame\x12\x0c\n\x04time\x18\x01 \x01(\x04\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\x1a+\n\x06\x45vents\x12\r\n\x05times\x18\x01 \x03(\x04\x12\x12\n\namplitudes\x18\x02 \x03(\x04\x62\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
 
-_POINT_CHANNEL_BLOCK_EVENT = _descriptor.Descriptor(
-  name='Event',
-  full_name='Rsh.Point.Channel.Block.Event',
+_POINT_CHANNEL_BLOCK_FRAME = _descriptor.Descriptor(
+  name='Frame',
+  full_name='Rsh.Point.Channel.Block.Frame',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='time', full_name='Rsh.Point.Channel.Block.Event.time', index=0,
+      name='time', full_name='Rsh.Point.Channel.Block.Frame.time', index=0,
       number=1, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='data', full_name='Rsh.Point.Channel.Block.Event.data', index=1,
+      name='data', full_name='Rsh.Point.Channel.Block.Frame.data', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -59,26 +58,26 @@ _POINT_CHANNEL_BLOCK_EVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=258,
-  serialized_end=293,
+  serialized_start=293,
+  serialized_end=328,
 )
 
-_POINT_CHANNEL_BLOCK_PEAKS = _descriptor.Descriptor(
-  name='Peaks',
-  full_name='Rsh.Point.Channel.Block.Peaks',
+_POINT_CHANNEL_BLOCK_EVENTS = _descriptor.Descriptor(
+  name='Events',
+  full_name='Rsh.Point.Channel.Block.Events',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='times', full_name='Rsh.Point.Channel.Block.Peaks.times', index=0,
+      name='times', full_name='Rsh.Point.Channel.Block.Events.times', index=0,
       number=1, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='amplitudes', full_name='Rsh.Point.Channel.Block.Peaks.amplitudes', index=1,
+      name='amplitudes', full_name='Rsh.Point.Channel.Block.Events.amplitudes', index=1,
       number=2, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -96,8 +95,8 @@ _POINT_CHANNEL_BLOCK_PEAKS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=295,
-  serialized_end=337,
+  serialized_start=330,
+  serialized_end=373,
 )
 
 _POINT_CHANNEL_BLOCK = _descriptor.Descriptor(
@@ -115,23 +114,37 @@ _POINT_CHANNEL_BLOCK = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='events', full_name='Rsh.Point.Channel.Block.events', index=1,
+      name='frames', full_name='Rsh.Point.Channel.Block.frames', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='peaks', full_name='Rsh.Point.Channel.Block.peaks', index=2,
+      name='events', full_name='Rsh.Point.Channel.Block.events', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='length', full_name='Rsh.Point.Channel.Block.length', index=3,
+      number=4, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='bin_size', full_name='Rsh.Point.Channel.Block.bin_size', index=4,
+      number=5, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
   ],
   extensions=[
   ],
-  nested_types=[_POINT_CHANNEL_BLOCK_EVENT, _POINT_CHANNEL_BLOCK_PEAKS, ],
+  nested_types=[_POINT_CHANNEL_BLOCK_FRAME, _POINT_CHANNEL_BLOCK_EVENTS, ],
   enum_types=[
   ],
   options=None,
@@ -140,8 +153,8 @@ _POINT_CHANNEL_BLOCK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=140,
-  serialized_end=337,
+  serialized_start=139,
+  serialized_end=373,
 )
 
 _POINT_CHANNEL = _descriptor.Descriptor(
@@ -152,7 +165,7 @@ _POINT_CHANNEL = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='num', full_name='Rsh.Point.Channel.num', index=0,
+      name='id', full_name='Rsh.Point.Channel.id', index=0,
       number=1, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -178,7 +191,7 @@ _POINT_CHANNEL = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=73,
-  serialized_end=337,
+  serialized_end=373,
 )
 
 _POINT = _descriptor.Descriptor(
@@ -208,18 +221,19 @@ _POINT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=25,
-  serialized_end=337,
+  serialized_end=373,
 )
 
-_POINT_CHANNEL_BLOCK_EVENT.containing_type = _POINT_CHANNEL_BLOCK
-_POINT_CHANNEL_BLOCK_PEAKS.containing_type = _POINT_CHANNEL_BLOCK
-_POINT_CHANNEL_BLOCK.fields_by_name['events'].message_type = _POINT_CHANNEL_BLOCK_EVENT
-_POINT_CHANNEL_BLOCK.fields_by_name['peaks'].message_type = _POINT_CHANNEL_BLOCK_PEAKS
+_POINT_CHANNEL_BLOCK_FRAME.containing_type = _POINT_CHANNEL_BLOCK
+_POINT_CHANNEL_BLOCK_EVENTS.containing_type = _POINT_CHANNEL_BLOCK
+_POINT_CHANNEL_BLOCK.fields_by_name['frames'].message_type = _POINT_CHANNEL_BLOCK_FRAME
+_POINT_CHANNEL_BLOCK.fields_by_name['events'].message_type = _POINT_CHANNEL_BLOCK_EVENTS
 _POINT_CHANNEL_BLOCK.containing_type = _POINT_CHANNEL
 _POINT_CHANNEL.fields_by_name['blocks'].message_type = _POINT_CHANNEL_BLOCK
 _POINT_CHANNEL.containing_type = _POINT
 _POINT.fields_by_name['channels'].message_type = _POINT_CHANNEL
 DESCRIPTOR.message_types_by_name['Point'] = _POINT
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), dict(
 
@@ -227,17 +241,17 @@ Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), d
 
     Block = _reflection.GeneratedProtocolMessageType('Block', (_message.Message,), dict(
 
-      Event = _reflection.GeneratedProtocolMessageType('Event', (_message.Message,), dict(
-        DESCRIPTOR = _POINT_CHANNEL_BLOCK_EVENT,
+      Frame = _reflection.GeneratedProtocolMessageType('Frame', (_message.Message,), dict(
+        DESCRIPTOR = _POINT_CHANNEL_BLOCK_FRAME,
         __module__ = 'rsb_event_pb2'
-        # @@protoc_insertion_point(class_scope:Rsh.Point.Channel.Block.Event)
+        # @@protoc_insertion_point(class_scope:Rsh.Point.Channel.Block.Frame)
         ))
       ,
 
-      Peaks = _reflection.GeneratedProtocolMessageType('Peaks', (_message.Message,), dict(
-        DESCRIPTOR = _POINT_CHANNEL_BLOCK_PEAKS,
+      Events = _reflection.GeneratedProtocolMessageType('Events', (_message.Message,), dict(
+        DESCRIPTOR = _POINT_CHANNEL_BLOCK_EVENTS,
         __module__ = 'rsb_event_pb2'
-        # @@protoc_insertion_point(class_scope:Rsh.Point.Channel.Block.Peaks)
+        # @@protoc_insertion_point(class_scope:Rsh.Point.Channel.Block.Events)
         ))
       ,
       DESCRIPTOR = _POINT_CHANNEL_BLOCK,
@@ -257,8 +271,8 @@ Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), d
 _sym_db.RegisterMessage(Point)
 _sym_db.RegisterMessage(Point.Channel)
 _sym_db.RegisterMessage(Point.Channel.Block)
-_sym_db.RegisterMessage(Point.Channel.Block.Event)
-_sym_db.RegisterMessage(Point.Channel.Block.Peaks)
+_sym_db.RegisterMessage(Point.Channel.Block.Frame)
+_sym_db.RegisterMessage(Point.Channel.Block.Events)
 
 
 # @@protoc_insertion_point(module_scope)
