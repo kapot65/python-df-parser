@@ -135,13 +135,13 @@ def __prepare_meta(json_meta):
     if isinstance(json_meta, dict):
         json_meta = json.dumps(json_meta, indent=4).encode()
         json_meta += b'\r\n\r\n'
-    elif isinstance(json_meta, str):
+    elif not isinstance(json_meta, str):
         raise ValueError("Input meta should be dict or str")
     return json_meta
 
 
 def __check_data(data):
-    if isinstance(data, bytes):
+    if not isinstance(data, bytes):
         raise ValueError("Input data should have bytes type")
 
 
