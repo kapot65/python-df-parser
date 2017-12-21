@@ -6,14 +6,14 @@ import re
 import struct
 import sys
 import time
+import zlib
+
+from df_data.type_codes import header_types, meta_types
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 if CUR_DIR not in sys.path:
     sys.path.append(CUR_DIR)
 del CUR_DIR
-
-from df_data.type_codes import header_types
-from df_data.type_codes import meta_types
 
 
 def create_message(json_meta: dict, data: bytearray=b'',
@@ -27,9 +27,9 @@ def create_message(json_meta: dict, data: bytearray=b'',
 
     """
     __check_data(data)
-
-    header = __create_machine_header(json_meta, data, data_type)
     meta = __prepare_meta(json_meta)
+    data = __compress(json_meta, data)
+    header = __create_machine_header(json_meta, data, data_type)
 
     return header + meta + data
 
@@ -50,7 +50,8 @@ def parse_from_file(filename: str, nodata: bool=False) \
         meta = __parse_meta(meta_raw, header)
         data = b''
         if not nodata:
-            data = file.read(header['data_len'])
+            data = __decompress(meta, file.read(header['data_len']))
+
         return header, meta, data
 
 
@@ -69,7 +70,10 @@ def parse_message(message: bytearray, nodata: bool=False) \
     data_start = 30 + header['meta_len']
     data = b''
     if not nodata:
-        data = message[data_start:data_start + header['data_len']]
+        data = __decompress(
+            meta, 
+            message[data_start:data_start + header['data_len']]
+        )
     return header, meta, data
 
 
@@ -119,7 +123,31 @@ def get_messages_from_stream(data: bytearray) \
     data = data[last_pos:]
     return messages, data
 
+
 get_messages_from_stream.header_re = re.compile(b"#!.{24}!#", re.DOTALL)
+
+                                                
+def __decompress(meta, data):
+    if "compression" in meta:
+        if meta["compression"] == "zlib":
+            return zlib.decompress(data)
+        else:
+            raise NotImplementedError(
+                "Only zlib compression supported"
+            )
+    return data
+
+
+def __compress(meta, data):
+    if "compression" in meta:
+        if meta["compression"] == "zlib":
+            return zlib.compress(data)
+        else:
+            raise NotImplementedError(
+                "Only zlib compression supported"
+            )
+    return data
+    
 
 
 def __parse_meta(meta_raw, header):
