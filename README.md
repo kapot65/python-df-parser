@@ -15,21 +15,25 @@ Latest version on PyPi can be installed by command `pip3 install dfparser`
 ## Usage
 #### Create simple message
   - 0x14000 protocol version
+  
           >>> import dfparser
           >>> dfparser.create_message({"param": "abc"}, data=b'bnary')
           b'#!\x00\x01@\x00pY_2\x00\x01\x00\x00\x00\x00\x00\x1a\x00\x00\x00\x00\x00\x00\x00\x05!#\r\n{\n    "param": "abc"\n}\r\n\r\nbnary'
   - DF02 version
+  
           >>> import dfparser
           >>> dfparser.create_message({"param": "abc"}, b'binary', version=b'DF02')
           b'#~DF02JS\x00\x00\x00\x1a\x00\x00\x00\x06~#\r\n{\n    "param": "abc"\n}\r\n\r\nbinary'
 
 #### Parse message
   - From file
+  
           >>> import dfparser
           >>> header, meta, data = envelope_parser.parse_from_file("df02.df")
           >>> # Or read only metadata
           >>> header, meta, _ = envelope_parser.parse_from_file("df02.df", nodata=True)
   - From bytes
+  
           >>> import dfparser
           >>> data = b'#~DF02JS\x00\x00\x00\x1a\x00\x00\x00\x06~#\r\n{\n    "param": "abc"\n}\r\n\r\nbinary'
           >>> envelope_parser.parse_message(data)
@@ -38,6 +42,7 @@ Latest version on PyPi can be installed by command `pip3 install dfparser`
           b'binary')
 
   - From stream
+  
           >>> import dfparser
           >>> # stream.df contains multiple messages sequentaly written
           >>> data = open("/home/chernov/stream.df", 'rb').read()
@@ -60,6 +65,7 @@ Latest version on PyPi can be installed by command `pip3 install dfparser`
 
 ### Transparent compression
   To apply transparent compression to message meta should contains field `"compression": "zlib"`
+  
       >>> import dfparser
       >>> data = b''.join(b'0' for _ in range(100))
       >>> compr = dfparser.create_message({"compression": "zlib"}, data)
@@ -70,6 +76,7 @@ Latest version on PyPi can be installed by command `pip3 install dfparser`
       True
 
 ## Build
+
         # Update protobuf formats use:
         #(Protobuf 3.2.0+)[https://github.com/google/protobuf/releases] should
         # be installed and be in $PATH
