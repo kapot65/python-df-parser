@@ -1,29 +1,28 @@
 """Parser for Troitsk Rsh data files."""
 
-from datetime import datetime
 import os
 import struct
 import sys
+from datetime import datetime
 
 import dateutil
 import numpy as np
+
+from df_data.type_codes import (channel_control, synchro_channel_control,
+                                synchro_channel_types, synchro_control)
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 if CUR_DIR not in sys.path:
     sys.path.append(CUR_DIR)
 del CUR_DIR
 
-from df_data.type_codes import channel_control
-from df_data.type_codes import synchro_channel_control
-from df_data.type_codes import synchro_channel_types
-from df_data.type_codes import synchro_control
 
 
 def serialise_to_rsh(params: dict) -> str:
     """Преобразование конфигурационного файла в формате JSON в текстовый хедер.
 
     rsh. Хедер можно использовать как конфигурационный файл для lan10-12base
-    @params -- параметры в формате JSON (dfparser.def_values.def_rsh_params)
+    @params -- параметры в формате JSON (dfparser.def_values.DEF_RSH_PARAMS)
     @return -- текстовый хедер
 
     """
@@ -65,7 +64,7 @@ def parse_from_rsb(header: bytearray) -> dict:
     """Парсинг бинарного хедера rsb в JSON.
 
     @header -- бинарный хедер (2048 bytes)
-    @return -- параметры в формате JSON (dfparser.def_values.def_rsh_params)
+    @return -- параметры в формате JSON (dfparser.def_values.DEF_RSH_PARAMS)
 
     """
     params = {}
@@ -117,7 +116,7 @@ def parse_from_rsb(header: bytearray) -> dict:
     ch_params = []
 
     for i in range(params["channel_number"]):
-        ch_data = header[372 + 56*i: 372 + 56*(i+1)]
+        ch_data = header[372 + 56 * i: 372 + 56 * (i + 1)]
         ch_param = {}
 
         param_num = struct.unpack('I', ch_data[36:40])[0]
@@ -171,7 +170,7 @@ def parse_from_rsb(header: bytearray) -> dict:
 def serialize_to_rsb(params: dict) -> bytes:
     """Сериализация JSON хедера rsb.
 
-    @params -- параметры в формате JSON (dfparser.def_values.def_rsh_params)
+    @params -- параметры в формате JSON (dfparser.def_values.DEF_RSH_PARAMS)
     @return -- бинарный хедер (2048 bytes)
 
     """
@@ -191,7 +190,8 @@ def serialize_to_rsb(params: dict) -> bytes:
         end_time = dateutil.parser.parse(params["end_time"]).timestamp()
         header[24:32] = struct.pack('Q', int(end_time))
 
-    header[32:32+len(params["filepath"])] = params['filepath'].encode('cp1251')
+    header[32:32 + len(params["filepath"])
+           ] = params['filepath'].encode('cp1251')
 
     header[288:292] = struct.pack('i', params["num_blocks"])
 
@@ -214,7 +214,7 @@ def serialize_to_rsb(params: dict) -> bytes:
         else:
             code = synchro_control[sync_params[i]]
 
-        header[320 + i*4:320 + (i + 1)*4] = struct.pack('I', code)
+        header[320 + i * 4:320 + (i + 1) * 4] = struct.pack('I', code)
 
     header[344:352] = struct.pack('d', params["sample_freq"])
     header[352:356] = struct.pack('I', params["pre_history"])
@@ -228,7 +228,7 @@ def serialize_to_rsb(params: dict) -> bytes:
     header[368:372] = struct.pack('I', params["channel_number"])
 
     for i in range(params["channel_number"]):
-        off = 372 + 56*i
+        off = 372 + 56 * i
 
         ch_param = params['channel'][i]
 
@@ -241,8 +241,8 @@ def serialize_to_rsb(params: dict) -> bytes:
                 code = 0
             else:
                 code = channel_control[param]
-                header[off + 4 + j*4:
-                       off + 4 + (j + 1)*4] = struct.pack('I', code)
+                header[off + 4 + j * 4:
+                       off + 4 + (j + 1) * 4] = struct.pack('I', code)
 
     synchro_channel = params['synchro_channel']
     header[632:636] = struct.pack('I', len(synchro_channel['params']))
@@ -252,7 +252,7 @@ def serialize_to_rsb(params: dict) -> bytes:
             code = 0
         else:
             code = synchro_channel_control[param]
-            header[600 + i*4: 600 + (i + 1)*4] = struct.pack('I', code)
+            header[600 + i * 4: 600 + (i + 1) * 4] = struct.pack('I', code)
 
     sync_type = synchro_channel_types[synchro_channel['type']]
     header[304:308] = struct.pack('I', sync_type)
@@ -263,7 +263,7 @@ def serialize_to_rsb(params: dict) -> bytes:
         header[640:644] = struct.pack('I', params["err_lang"])
 
     if "board_name" in params:
-        header[644:644+len(params["board_name"])] = \
+        header[644:644 + len(params["board_name"])] = \
             params['board_name'].encode('cp1251')
 
     if "board_id" in params:
@@ -291,8 +291,8 @@ def dump_to_rsb(params: dict, times: np.ndarray, data: np.ndarray) -> bytes:
     params['b_size'] = data.shape[1]
     params['events_num'] = data.shape[0]
 
-    start = int(times.min()*1e-9)
-    end = int(times.max()*1e-9)
+    start = int(times.min() * 1e-9)
+    end = int(times.max() * 1e-9)
 
     if 'start_time' not in params:
         params['start_time'] = datetime.fromtimestamp(start).isoformat()
@@ -313,12 +313,13 @@ def dump_to_rsb(params: dict, times: np.ndarray, data: np.ndarray) -> bytes:
     ch_num = params['channel_number']
     ev_size = params['b_size']
     for i, event_data in enumerate(data):
-        event = bytearray(np.zeros(96 + 2*ch_num*ev_size, np.byte).tostring())
-        text_hdr = datetime.fromtimestamp(int(times[i]*10e-9)).isoformat()
+        event = bytearray(
+            np.zeros(96 + 2 * ch_num * ev_size, np.byte).tostring())
+        text_hdr = datetime.fromtimestamp(int(times[i] * 10e-9)).isoformat()
 
         event[:len(text_hdr)] = text_hdr.encode('cp1251')
         event[64:68] = struct.pack('I', i)
-        event[72:80] = struct.pack('Q', int(times[i]*10e-9))
+        event[72:80] = struct.pack('Q', int(times[i] * 10e-9))
         event[80:88] = struct.pack('Q', int(times[i]))
 
         event[96:] = event_data.astype(np.int16).tostring()
@@ -358,7 +359,7 @@ class RshPackage(object):
 
         event = {}
 
-        self.file.seek(7168 + num*(96 + 2*ch_num*ev_size))
+        self.file.seek(7168 + num * (96 + 2 * ch_num * ev_size))
 
         event["text_hdr"] = self.file.read(64)
         event["ev_num"] = struct.unpack('I', self.file.read(4))[0]
@@ -371,7 +372,7 @@ class RshPackage(object):
             event['ns_since_epoch'] = ns_since_epoch
         self.file.read(8)
 
-        event_data = self.file.read(2*ev_size*ch_num)
+        event_data = self.file.read(2 * ev_size * ch_num)
 
         event["data"] = np.fromstring(event_data, np.short)
 
@@ -392,10 +393,10 @@ class RshPackage(object):
         ch_num = self.params['channel_number']
         ev_size = self.params['b_size']
 
-        if data.shape != (ch_num*ev_size,):
+        if data.shape != (ch_num * ev_size,):
             raise Exception("data should contain same number of elements "
-                            "(%s)" % (ch_num*ev_size))
+                            "(%s)" % (ch_num * ev_size))
 
-        self.file.seek(7168 + num*(96 + 2*ch_num*ev_size) + 96)
+        self.file.seek(7168 + num * (96 + 2 * ch_num * ev_size) + 96)
         self.file.write(data.tostring())
         self.file.flush()

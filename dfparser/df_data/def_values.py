@@ -6,7 +6,7 @@ Created on Wed May 10 15:30:12 2017
 @author: chernov
 """
 
-def_rsh_params = {
+DEF_RSH_PARAMS = {
     "filepath": "this",
     "num_blocks": 0,
     "aquisition_time": 1.0e+4,
@@ -17,7 +17,7 @@ def_rsh_params = {
     "synchro_channel": {
         "type": "SYNCHRO_PROGRAMM",
         "params": ["Default"],
-        "gain": 1   
+        "gain": 1
     },
     "sample_freq": 3.125e+6,
     "pre_history": 8,
@@ -27,14 +27,14 @@ def_rsh_params = {
     "hysteresis": 0,
     "channel": [
         {
-         "params": ["Used", "Synchro", "Resist50Ohm"],
-         "adjustment": 0,
-         "gain": 1
-         },
-         {
-         "params": ["NotUsed"],
-         "adjustment": 0,
-         "gain": 1
-         }
-      ]
+            "params": ["Used", "Synchro", "Resist50Ohm"],
+            "adjustment": 0,
+            "gain": 1
+        },
+        {
+            "params": ["NotUsed"],
+            "adjustment": 0,
+            "gain": 1
+        }
+    ]
 }
