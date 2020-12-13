@@ -6,9 +6,6 @@ def parse_requirements(filename):
     lineiter = (line.strip() for line in open(filename))
     return [line for line in lineiter if line and not line.startswith("#")]
 
-INSTALL_REQS = parse_requirements("dfparser/requirements.txt")
-REQS = [str(ir.req) for ir in INSTALL_REQS]
-
 setup(
     name='dfparser',
     packages=find_packages(),
@@ -21,7 +18,7 @@ setup(
     download_url='https://github.com/kapot65/python-df-parser/tarball/0.0.19'
     'master.zip',
     keywords=['dataforge', 'parser'],
-    install_requires=REQS,
+    install_requires=parse_requirements("dfparser/requirements.txt"),
     include_package_data=True,
     package_data={
         '': ['*.proto'],
