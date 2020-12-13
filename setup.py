@@ -1,9 +1,12 @@
 """Dataforge parser setup script."""
-from pip.req import parse_requirements
 from setuptools import find_packages, setup
 
-INSTALL_REQS = parse_requirements("dfparser/requirements.txt",
-                                  session='hack')
+def parse_requirements(filename):
+    """ load requirements from a pip requirements file """
+    lineiter = (line.strip() for line in open(filename))
+    return [line for line in lineiter if line and not line.startswith("#")]
+
+INSTALL_REQS = parse_requirements("dfparser/requirements.txt")
 REQS = [str(ir.req) for ir in INSTALL_REQS]
 
 setup(
