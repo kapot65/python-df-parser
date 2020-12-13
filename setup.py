@@ -12,7 +12,7 @@ REQS = [str(ir.req) for ir in INSTALL_REQS]
 setup(
     name='dfparser',
     packages=find_packages(),
-    version='0.0.19',
+    version='0.0.20',
     description='Parser for dataforge-envelope (http://npm.mipt.ru/'
     'dataforge/) format.',
     author='Vasilii Chernov',
