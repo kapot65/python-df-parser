@@ -9,13 +9,13 @@ def parse_requirements(filename):
 setup(
     name='dfparser',
     packages=find_packages(),
-    version='0.0.20',
+    version='0.0.21',
     description='Parser for dataforge-envelope (http://npm.mipt.ru/'
     'dataforge/) format.',
     author='Vasilii Chernov',
     author_email='kapot65@gmail.com',
     url='https://github.com/kapot65/python-df-parser',
-    download_url='https://github.com/kapot65/python-df-parser/tarball/0.0.19'
+    download_url='https://github.com/kapot65/python-df-parser/tarball/0.0.21'
     'master.zip',
     keywords=['dataforge', 'parser'],
     install_requires=parse_requirements("dfparser/requirements.txt"),

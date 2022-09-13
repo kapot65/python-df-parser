@@ -17,7 +17,7 @@ Latest version on PyPi can be installed by command `pip3 install dfparser`
   - 0x14000 protocol version
   
           >>> import dfparser
-          >>> dfparser.create_message({"param": "abc"}, data=b'bnary')
+          >>> dfparser.create_message({"param": "abc"}, data=b'binary')
           b'#!\x00\x01@\x00pY_2\x00\x01\x00\x00\x00\x00\x00\x1a\x00\x00\x00\x00\x00\x00\x00\x05!#\r\n{\n    "param": "abc"\n}\r\n\r\nbnary'
   - DF02 version
   
