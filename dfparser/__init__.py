@@ -5,8 +5,6 @@ Set package version.
 import os
 import sys
 
-from pkg_resources import get_distribution
-
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 if CUR_DIR not in sys.path:
     sys.path.append(CUR_DIR)
@@ -26,4 +24,4 @@ from rsh_parser import RshPackage
 from rsh_parser import serialise_to_rsh
 from rsh_parser import serialize_to_rsb
 
-__version__ = get_distribution('dfparser').version
+__version__ = "MASTER"
